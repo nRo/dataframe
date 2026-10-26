@@ -27,6 +27,7 @@ package dev.gruen.dataframe.filter;
 import dev.gruen.dataframe.DataFrameRuntimeException;
 import dev.gruen.dataframe.common.Row;
 import dev.gruen.dataframe.filter.compile.PredicateCompiler;
+import dev.gruen.query.Query;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -37,7 +38,7 @@ import java.util.regex.Pattern;
 /**
  * Created by Alex on 09.03.2016.
  */
-public abstract class FilterPredicate {
+public abstract class FilterPredicate implements Query {
 
     public static final FilterPredicate EMPTY_FILTER = empty();
 

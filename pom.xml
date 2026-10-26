@@ -6,20 +6,19 @@
 
     <groupId>dev.gruen</groupId>
     <artifactId>dataframe</artifactId>
-    <version>0.8.0</version>
+    <version>0.8.1</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>21</maven.compiler.release>
-        <antlr4.version>4.13.2</antlr4.version>
         <slf4j.version>2.0.17</slf4j.version>
         <junit.version>5.14.4</junit.version>
         <spotbugs.failOnError>true</spotbugs.failOnError>
         <jacoco.min.instruction>0.74</jacoco.min.instruction>
         <jacoco.min.branch>0.70</jacoco.min.branch>
     </properties>
-    <name>DataFrame</name>
+    <name>dataframe</name>
     <description>DataFrame Library for Java</description>
-    <url>https://github.com/nRo/DataFrame</url>
+    <url>https://github.com/nRo/dataframe</url>
     <licenses>
         <license>
             <name>MIT License</name>
@@ -27,8 +26,8 @@
         </license>
     </licenses>
     <scm>
-        <url>https://github.com/nRo/DataFrame</url>
-        <connection>scm:git:https://github.com/nRo/DataFrame.git</connection>
+        <url>https://github.com/nRo/dataframe</url>
+        <connection>scm:git:https://github.com/nRo/dataframe.git</connection>
         <tag>HEAD</tag>
     </scm>
     <developers>
@@ -41,9 +40,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.antlr</groupId>
-            <artifactId>antlr4-runtime</artifactId>
-            <version>${antlr4.version}</version>
+            <groupId>dev.gruen</groupId>
+            <artifactId>query-compiler</artifactId>
+            <version>0.5.1</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -133,21 +132,6 @@
                         </manifestEntries>
                     </archive>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.antlr</groupId>
-                <artifactId>antlr4-maven-plugin</artifactId>
-                <version>${antlr4.version}</version>
-                <configuration>
-                    <visitor>true</visitor>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>antlr4</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <artifactId>maven-source-plugin</artifactId>

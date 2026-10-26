@@ -64,7 +64,7 @@ public class PredicateValueReaderTest {
         Assertions.assertEquals(1, filtered.size());
         Assertions.assertEquals("b", filtered.getRow(0).getString("name"));
 
-        filtered = dataFrame.select("(name != 'a' && z) OR (name != 'd' && !z)");
+        filtered = dataFrame.select("(name != 'a' && z == true) OR (name != 'd' && z == false)");
         Assertions.assertEquals(2, filtered.size());
         Assertions.assertEquals("b", filtered.getRow(0).getString("name"));
         Assertions.assertEquals("c", filtered.getRow(1).getString("name"));
@@ -125,14 +125,14 @@ public class PredicateValueReaderTest {
         filtered = dataFrame.select("(.z == true) XOR (v == true)");
         Assertions.assertEquals(2, filtered.size());
 
-        DataFrame filtered2 = dataFrame.select(".z XOR v");
+        DataFrame filtered2 = dataFrame.select(".z == true XOR v == true");
         Assertions.assertEquals(2, filtered2.size());
         Assertions.assertEquals(filtered, filtered2);
 
 
         filtered = dataFrame.select("(z == true) NOR (v == true)");
         Assertions.assertEquals(1, filtered.size());
-        filtered2 = dataFrame.select("z NOR v");
+        filtered2 = dataFrame.select("z == true NOR v == true");
         Assertions.assertEquals(1, filtered.size());
         Assertions.assertEquals(filtered, filtered2);
 
@@ -147,11 +147,11 @@ public class PredicateValueReaderTest {
         Assertions.assertEquals("b", filtered.getRow(0).getString("name"));
         Assertions.assertEquals("c", filtered.getRow(1).getString("name"));
 
-        filtered = dataFrame.select(".z && .v");
+        filtered = dataFrame.select(".z == true && .v == true");
         Assertions.assertEquals(1, filtered.size());
         Assertions.assertEquals("a", filtered.getRow(0).getString("name"));
 
-        filtered = dataFrame.select("z || v");
+        filtered = dataFrame.select("z == true || v == true");
         Assertions.assertEquals(3, filtered.size());
 
         filtered = dataFrame.select("n == null");
