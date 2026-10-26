@@ -3,6 +3,20 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.8.1]
+
+### Breaking changes
+- Filter queries (`DataFrame.select(String)`, `FilterPredicate.compile(String)`) are now parsed by the [query-compiler](https://github.com/nRo/query-compiler) library
+  (`dev.gruen:query-compiler`) instead of the built-in ANTLR grammar. The ANTLR grammar, the generated parser and the visitors were removed.
+  Changes in the query syntax:
+  - Logical operators have a precedence now: `AND` binds stronger than `XOR`, which binds stronger than `OR` / `NOR` (left-associative). Before, all logical operators were evaluated from left to right with equal precedence. Use brackets to keep the old evaluation order.
+  - Boolean column flags (`flag`, `!flag`) are no longer supported. Use `flag == true` / `flag == false`.
+  - A query that is a single word is parsed as full-text search, which is not supported by DataFrame, and raises a `PredicateCompilerException`.
+  - Decimal numbers with a comma (`1,5`) are no longer supported because `,` separates the values of `in (..)` lists. Use `1.5`.
+
+### Added
+- Filter queries support `in (1, 2)`, `!in (1, 2)` and `*=` (contains) operators.
+
 ## [0.8.0]
 
 ### Breaking changes

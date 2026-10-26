@@ -25,35 +25,37 @@
 package dev.gruen.dataframe.filter.compile;
 
 import dev.gruen.dataframe.filter.FilterPredicate;
-import dev.gruen.dataframe.generated.PredicateLexer;
-import dev.gruen.dataframe.generated.PredicateParser;
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.ConsoleErrorListener;
+import dev.gruen.query.compiler.QueryCompiler;
+import dev.gruen.query.compiler.QueryCompilerBuilder;
+import dev.gruen.query.compiler.QueryCompilerException;
+import dev.gruen.query.term.TermOperator;
 
 /**
  * Created by Alex on 18.05.2017.
  */
 public class PredicateCompiler {
+    private static final TermOperator LIKE_OPERATOR = new TermOperator("LIKE", "like");
+
+    private static final QueryCompiler<FilterPredicate> COMPILER = createCompiler();
+
+    private static QueryCompiler<FilterPredicate> createCompiler() {
+        FilterPredicateQueryCreator creator = new FilterPredicateQueryCreator();
+        return QueryCompilerBuilder.createDefault(FilterPredicate.class, creator)
+                .withColumnValues()
+                .withTermCreator(LIKE_OPERATOR, creator::like)
+                .build();
+    }
 
     public static FilterPredicate compile(String predicateString){
         predicateString = predicateString.trim();
         if(predicateString.isEmpty()){
             return FilterPredicate.empty();
         }
-        PredicateCompileErrorListener errorListener = new PredicateCompileErrorListener(predicateString);
-
-        CharStream stream = CharStreams.fromString(predicateString);
-        PredicateLexer lexer = new PredicateLexer(stream);
-        lexer.removeErrorListener(ConsoleErrorListener.INSTANCE);
-        lexer.addErrorListener(errorListener);
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-        PredicateParser parser = new PredicateParser(tokens);
-        parser.removeErrorListener(ConsoleErrorListener.INSTANCE);
-        parser.addErrorListener(errorListener);
-        FilterPredicateVisitor filterPredicateVisitor = new FilterPredicateVisitor();
-        return  filterPredicateVisitor.visit(parser.compilationUnit());
+        try {
+            return COMPILER.compile(predicateString);
+        } catch (QueryCompilerException e) {
+            throw new PredicateCompilerException(e.getMessage(), e);
+        }
     }
 
 }

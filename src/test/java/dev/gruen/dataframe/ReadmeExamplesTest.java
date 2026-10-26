@@ -5,6 +5,7 @@ import dev.gruen.dataframe.csv.CSVReaderBuilder;
 import dev.gruen.dataframe.csv.CSVWriter;
 import dev.gruen.dataframe.csv.CSVWriterBuilder;
 import dev.gruen.dataframe.filter.FilterPredicate;
+import dev.gruen.dataframe.filter.compile.PredicateCompilerException;
 import dev.gruen.dataframe.group.DataGroup;
 import dev.gruen.dataframe.group.DataGrouping;
 import dev.gruen.dataframe.group.aggr.Aggregate;
@@ -153,15 +154,15 @@ public class ReadmeExamplesTest {
         }
 
         DataRows rows = dataFrame.getRows();
-        Assertions.assertEquals(24, rows.get(0).getInteger("age"));
+        Assertions.assertEquals(24, rows.getFirst().getInteger("age"));
 
         dataFrame.sort("name");
 
         // the DataFrame was sorted after the DataRows were obtained: accessing the old rows throws
-        Assertions.assertThrows(RuntimeException.class, () -> rows.get(0).getInteger("age"));
+        Assertions.assertThrows(RuntimeException.class, () -> rows.getFirst().getInteger("age"));
 
         DataRows validRows = dataFrame.getRows();
-        validRows.get(0).getInteger("age");
+        validRows.getFirst().getInteger("age");
 
         DataFrame independent = validRows.toDataFrame();
         dataFrame.sort("age");
@@ -266,8 +267,9 @@ public class ReadmeExamplesTest {
         DataFrame df = DataFrame.create().addStringColumn("name").addBooleanColumn("selected");
         df.append("a", true);
         df.append("b", false);
-        Assertions.assertEquals(1, df.select("!selected").size());
-        Assertions.assertEquals(2, df.select("(name == 'a') OR !selected").size());
+        Assertions.assertEquals(1, df.select("selected == false").size());
+        Assertions.assertEquals(2, df.select("(name == 'a') OR selected == false").size());
+        Assertions.assertThrows(PredicateCompilerException.class, () -> df.select("!selected"));
     }
 
     @Test
@@ -321,11 +323,11 @@ public class ReadmeExamplesTest {
     @Test
     public void testJoin() throws IOException {
         File a = new File(tempDir, "visits.csv");
-        Files.write(a.toPath(), "person_id;visits\n1;5\n2;7\n".getBytes(StandardCharsets.UTF_8));
+        Files.writeString(a.toPath(), "person_id;visits\n1;5\n2;7\n");
         File b = new File(tempDir, "orders.csv");
-        Files.write(b.toPath(), "customer_id;item\n1;book\n1;pen\n3;lamp\n".getBytes(StandardCharsets.UTF_8));
+        Files.writeString(b.toPath(), "customer_id;item\n1;book\n1;pen\n3;lamp\n");
         File u = new File(tempDir, "persons.csv");
-        Files.write(u.toPath(), "person_id;name\n1;Max\n2;Eva\n".getBytes(StandardCharsets.UTF_8));
+        Files.writeString(u.toPath(), "person_id;name\n1;Max\n2;Eva\n");
 
         DataFrame users = DataFrame.fromCSV(u, ';', true);
         DataFrame visits = DataFrame.fromCSV(a, ';', true);

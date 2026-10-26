@@ -2,8 +2,8 @@
 An easy-to-use DataFrame Library for Java.
 
 
-[![CI](https://github.com/nRo/DataFrame/actions/workflows/ci.yml/badge.svg)](https://github.com/nRo/DataFrame/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/nRo/DataFrame/branch/master/graph/badge.svg)](https://codecov.io/gh/nRo/DataFrame)
+[![CI](https://github.com/nRo/dataframe/actions/workflows/ci.yml/badge.svg)](https://github.com/nRo/dataframe/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/nRo/dataframe/branch/master/graph/badge.svg)](https://codecov.io/gh/nRo/dataframe)
 [![Maven Central](https://img.shields.io/maven-central/v/dev.gruen/dataframe.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/dev.gruen/dataframe)
 [![Javadocs](https://javadoc.io/badge2/dev.gruen/dataframe/javadoc.svg)](https://javadoc.io/doc/dev.gruen/dataframe)
 ![Java 21+](https://img.shields.io/badge/Java-21%2B-blue)
@@ -41,7 +41,7 @@ To build the library from sources you need JDK 21+ and Maven 3.9+:
 
 1) Clone github repository
 
-    $ git clone https://github.com/nRo/DataFrame.git
+    $ git clone https://github.com/nRo/dataframe.git
 
 2) Change to the created folder and run `mvn verify` (compile, tests, coverage gate and SpotBugs).
    Use `mvn install` to install the library into your local repository.
@@ -118,7 +118,7 @@ All examples are executed by `ReadmeExamplesTest` using the files in `src/test/r
 Select all users called Meier or Schmitt from Germany, group by age and add column that contains the number of users with the respective age.
 Then sort by age and print
 ```java
-URL csvUrl = new URL("https://raw.githubusercontent.com/nRo/DataFrame/master/src/test/resources/users.csv");
+URL csvUrl = new URL("https://raw.githubusercontent.com/nRo/dataframe/master/src/test/resources/users.csv");
 
 DataFrame users = DataFrame.load(csvUrl, FileFormat.CSV);
 
@@ -138,7 +138,7 @@ users.select("(name == 'Schmitt' || name == 'Meier') && country == 'Germany'")
 Load a csv file, set a unique column as primary key and add an index for two other columns.
 Select rows using the previously created index, change the values in their NAME column and join them with the original DataFrame.
 ```java
-URL csvUrl = new URL("https://raw.githubusercontent.com/nRo/DataFrame/master/src/test/resources/data_index.csv");
+URL csvUrl = new URL("https://raw.githubusercontent.com/nRo/dataframe/master/src/test/resources/data_index.csv");
 
 DataFrame dataFrame = DataFrame.load(csvUrl, FileFormat.CSV);
 
@@ -356,21 +356,24 @@ DataFrame foundUsers = users.select(
 
 ```
 Create and compile predicates from strings \
+The queries are parsed by the [query-compiler](https://github.com/nRo/query-compiler) library. \
 Available value comparison operations: \
-```==, !=, <, <=, >, >=, ~= (regex)``` \
+```==, !=, <, <=, >, >=, ~= (regex), *= (contains), LIKE, in (..), !in (..)``` \
 Available predicate operations: \
-```&&, ||, NOR, XOR, !(predicate) (negates the predicate) ```
+```&&, ||, NOR, XOR, !(predicate) (negates the predicate) ``` \
+Operator precedence: ```AND``` binds stronger than ```XOR```, which binds stronger than ```OR``` / ```NOR```. Use brackets to group terms.
 
 ```java
 //find all users that are younger than 18 or older users with first_name == "Max"
 DataFrame foundUsers = users.select("(age > 18 && first_name == 'Max') OR (age < 18)");
 
 //Boolean column filter
+//Boolean columns must be compared explicitly, a single word is not a valid query
 //find all users that are older than 18 or the selected column is true
-DataFrame foundUsers = users.select("(age > 18) OR selected");
+DataFrame foundUsers = users.select("(age > 18) OR selected == true");
 
 //find all users the selected column is false
-DataFrame notSelected = users.select("!selected");
+DataFrame notSelected = users.select("selected == false");
 
 //compare tow columns
 //returns all rows where col1 equals col2
