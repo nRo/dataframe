@@ -26,13 +26,13 @@ Add this to your `pom.xml`:
     <dependency>
         <groupId>dev.gruen</groupId>
         <artifactId>dataframe</artifactId>
-        <version>0.8.0</version>
+        <version>0.8.1</version>
     </dependency>
 ...
 </dependencies>
 ```
 
-The latest published version is shown in the Maven Central badge above. The `0.8.0` release has to be published first
+The latest published version is shown in the Maven Central badge above. The `0.8.1` release has to be published first
 (see [Release](#release)); until then build the snapshot from sources.
 
 Build
@@ -58,7 +58,7 @@ To build the library from sources you need JDK 21+ and Maven 3.9+:
     <dependency>
         <groupId>dev.gruen</groupId>
         <artifactId>dataframe</artifactId>
-        <version>0.8.0-SNAPSHOT</version>
+        <version>0.8.1-SNAPSHOT</version>
     </dependency>
 ...
 </dependencies>
@@ -71,6 +71,10 @@ sources and javadoc jars, signs the artifacts with GPG and uploads them using th
 [central-publishing-maven-plugin](https://central.sonatype.org/publish/publish-portal-maven/).
 The GitHub Actions workflow `release.yml` runs this for tags named `v*` and needs the secrets
 `CENTRAL_USERNAME`, `CENTRAL_PASSWORD`, `GPG_PRIVATE_KEY` and `GPG_PASSPHRASE`.
+
+Version 0.8.1
+-----
+- use [query-compiler](https://github.com/nRo/query-compiler) library
 
 Version 0.8.0
 -----
