@@ -25,6 +25,7 @@
 package dev.gruen.dataframe.io;
 
 import dev.gruen.dataframe.common.Row;
+import dev.gruen.dataframe.settings.DataFrameSettings;
 
 import java.util.Map;
 
@@ -37,4 +38,12 @@ public interface ReaderBuilder<R extends Row<?, ?>, D extends DataReader<R, ? ex
     ReaderBuilder<R, D> loadSettings(Map<String, String> map) throws Exception;
 
     ReaderBuilder<R, D> selectColumn(String col);
+
+    /**
+     * Sets the column settings applied to the columns of the loaded data frame.
+     *
+     * @param settings column settings
+     * @return self for method chaining
+     */
+    ReaderBuilder<R, D> withSettings(DataFrameSettings settings);
 }

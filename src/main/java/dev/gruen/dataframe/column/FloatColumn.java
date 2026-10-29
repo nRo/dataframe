@@ -32,7 +32,7 @@ import dev.gruen.dataframe.type.impl.FloatType;
  */
 public class FloatColumn extends NumberColumn<Float, FloatColumn> {
 
-    private final FloatType valueType = new FloatType();
+    private final FloatType valueType = new FloatType(getSettings());
 
     @Override
     public FloatType getValueType() {
@@ -66,7 +66,9 @@ public class FloatColumn extends NumberColumn<Float, FloatColumn> {
     public FloatColumn copy() {
         Float[] copyValues = new Float[values.length];
         toArray(copyValues);
-        return new FloatColumn(getName(), copyValues, size());
+        FloatColumn copy = new FloatColumn(getName(), copyValues, size());
+        getSettings().applyTo(copy.getSettings());
+        return copy;
     }
     @Override
     public <H> Float getValueFromRow(Row<?, H> row, H headerName) {
@@ -80,6 +82,8 @@ public class FloatColumn extends NumberColumn<Float, FloatColumn> {
 
     @Override
     public FloatColumn copyEmpty() {
-        return new FloatColumn(getName());
+        FloatColumn copy = new FloatColumn(getName());
+        getSettings().applyTo(copy.getSettings());
+        return copy;
     }
 }

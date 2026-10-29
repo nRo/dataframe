@@ -206,6 +206,54 @@ public interface DataFrame extends DataContainer<DataFrameHeader, DataRow> {
     DataFrame addByteColumn(String name);
 
     /**
+     * Adds a new {@link LocalDateColumn} to the dataframe.
+     *
+     * @param name name of the column
+     * @return <code>self</code> for method chaining
+     */
+    DataFrame addLocalDateColumn(String name);
+
+    /**
+     * Adds a new {@link LocalTimeColumn} to the dataframe.
+     *
+     * @param name name of the column
+     * @return <code>self</code> for method chaining
+     */
+    DataFrame addLocalTimeColumn(String name);
+
+    /**
+     * Adds a new {@link LocalDateTimeColumn} to the dataframe.
+     *
+     * @param name name of the column
+     * @return <code>self</code> for method chaining
+     */
+    DataFrame addLocalDateTimeColumn(String name);
+
+    /**
+     * Adds a new {@link InstantColumn} to the dataframe.
+     *
+     * @param name name of the column
+     * @return <code>self</code> for method chaining
+     */
+    DataFrame addInstantColumn(String name);
+
+    /**
+     * Adds a new {@link OffsetDateTimeColumn} to the dataframe.
+     *
+     * @param name name of the column
+     * @return <code>self</code> for method chaining
+     */
+    DataFrame addOffsetDateTimeColumn(String name);
+
+    /**
+     * Adds a new {@link ZonedDateTimeColumn} to the dataframe.
+     *
+     * @param name name of the column
+     * @return <code>self</code> for method chaining
+     */
+    DataFrame addZonedDateTimeColumn(String name);
+
+    /**
      * Adds a new {@link DoubleColumn} to the dataframe.
      *
      * @param name name of the column
@@ -762,6 +810,60 @@ public interface DataFrame extends DataContainer<DataFrameHeader, DataRow> {
      * @return found column
      */
     ByteColumn getByteColumn(String name);
+
+    /**
+     * Returns a {@link LocalDateColumn}
+     * If the column is not found or has the wrong type a {@link DataFrameRuntimeException} is thrown.
+     *
+     * @param name name of the column
+     * @return found column
+     */
+    LocalDateColumn getLocalDateColumn(String name);
+
+    /**
+     * Returns a {@link LocalTimeColumn}
+     * If the column is not found or has the wrong type a {@link DataFrameRuntimeException} is thrown.
+     *
+     * @param name name of the column
+     * @return found column
+     */
+    LocalTimeColumn getLocalTimeColumn(String name);
+
+    /**
+     * Returns a {@link LocalDateTimeColumn}
+     * If the column is not found or has the wrong type a {@link DataFrameRuntimeException} is thrown.
+     *
+     * @param name name of the column
+     * @return found column
+     */
+    LocalDateTimeColumn getLocalDateTimeColumn(String name);
+
+    /**
+     * Returns an {@link InstantColumn}
+     * If the column is not found or has the wrong type a {@link DataFrameRuntimeException} is thrown.
+     *
+     * @param name name of the column
+     * @return found column
+     */
+    InstantColumn getInstantColumn(String name);
+
+    /**
+     * Returns an {@link OffsetDateTimeColumn}
+     * If the column is not found or has the wrong type a {@link DataFrameRuntimeException} is thrown.
+     *
+     * @param name name of the column
+     * @return found column
+     */
+    OffsetDateTimeColumn getOffsetDateTimeColumn(String name);
+
+    /**
+     * Returns a {@link ZonedDateTimeColumn}
+     * If the column is not found or has the wrong type a {@link DataFrameRuntimeException} is thrown.
+     *
+     * @param name name of the column
+     * @return found column
+     */
+    ZonedDateTimeColumn getZonedDateTimeColumn(String name);
 
     /**
      * Returns a {@link LongColumn}

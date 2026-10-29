@@ -26,6 +26,7 @@ package dev.gruen.dataframe.csv;
 
 import dev.gruen.dataframe.DataFrame;
 import dev.gruen.dataframe.io.ReaderBuilder;
+import dev.gruen.dataframe.settings.DataFrameSettings;
 import dev.gruen.dataframe.type.DataFrameTypeManager;
 
 import java.io.File;
@@ -50,6 +51,7 @@ public class CSVReaderBuilder implements ReaderBuilder<CSVRow, CSVReader> {
     private final List<String> skipPrefixes = new ArrayList<>();
     private final Map<String, Class<?>> columnTypeMap = new HashMap<>();
     private char escapeChar = '\\';
+    private DataFrameSettings dataFrameSettings;
 
 
     public static CSVReaderBuilder create() {
@@ -147,6 +149,19 @@ public class CSVReaderBuilder implements ReaderBuilder<CSVRow, CSVReader> {
         return this;
     }
 
+    /**
+     * Sets the column settings that are applied to the columns of the loaded data frame.
+     * Settings can be used to configure e.g. the format of temporal columns.
+     *
+     * @param settings column settings
+     * @return self for method chaining
+     */
+    @Override
+    public CSVReaderBuilder withSettings(DataFrameSettings settings) {
+        this.dataFrameSettings = settings;
+        return this;
+    }
+
     public CSVReaderBuilder withHeader(boolean header) {
         this.containsHeader = header;
         return this;
@@ -223,11 +238,11 @@ public class CSVReaderBuilder implements ReaderBuilder<CSVRow, CSVReader> {
         settings.setSingleQuoteDetection(singleQuoteDetection);
         settings.setCharset(charset);
         settings.setEscapeChar(escapeChar);
-        ColumnSettings columnSettings = new ColumnSettings();
+        CSVColumnSettings columnSettings = new CSVColumnSettings();
         columnSettings.getColumnTypeMap().putAll(columnTypeMap);
         columnSettings.getIgnoreColumns().addAll(ignoreColumns);
         columnSettings.getSelectColumns().addAll(selectColumns);
-        return new CSVReader(settings, columnSettings);
+        return new CSVReader(settings, columnSettings, dataFrameSettings);
     }
 
     @Override

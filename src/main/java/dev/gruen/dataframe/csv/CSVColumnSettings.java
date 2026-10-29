@@ -32,7 +32,7 @@ import java.util.Map;
 /**
  * Created by Alex on 17.06.2017.
  */
-public class ColumnSettings {
+public class CSVColumnSettings {
     private final List<String> ignoreColumns = new ArrayList<>();
     private final List<String> selectColumns = new ArrayList<>();
     private final Map<String, Class<?>> columnTypeMap = new HashMap<>();

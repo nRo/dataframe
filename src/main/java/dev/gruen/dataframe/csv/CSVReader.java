@@ -25,6 +25,7 @@
 package dev.gruen.dataframe.csv;
 
 import dev.gruen.dataframe.io.DataReader;
+import dev.gruen.dataframe.settings.DataFrameSettings;
 
 import java.io.BufferedReader;
 import java.io.Reader;
@@ -35,11 +36,18 @@ import java.nio.charset.Charset;
  */
 public class CSVReader extends DataReader<CSVRow, CSVIterator> {
     private CSVSettings settings;
-    private final ColumnSettings columnSettings;
+    private final CSVColumnSettings columnSettings;
 
-    protected CSVReader(CSVSettings settings, ColumnSettings columnSettings) {
+    private final DataFrameSettings dataFrameSettings;
+
+    protected CSVReader(CSVSettings settings, CSVColumnSettings columnSettings) {
+        this(settings, columnSettings, null);
+    }
+
+    protected CSVReader(CSVSettings settings, CSVColumnSettings columnSettings, DataFrameSettings dataFrameSettings) {
         this.settings = settings;
         this.columnSettings = columnSettings;
+        this.dataFrameSettings = dataFrameSettings;
     }
 
     @Override
@@ -52,6 +60,6 @@ public class CSVReader extends DataReader<CSVRow, CSVIterator> {
 
     @Override
     public CSVIterator load(Reader reader) {
-        return new CSVIterator(new BufferedReader(reader), settings, columnSettings);
+        return new CSVIterator(new BufferedReader(reader), settings, columnSettings, dataFrameSettings);
     }
 }

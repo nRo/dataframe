@@ -27,6 +27,7 @@ package dev.gruen.dataframe.io;
 import dev.gruen.dataframe.common.Row;
 import dev.gruen.dataframe.common.RowIterable;
 import dev.gruen.dataframe.common.RowIterator;
+import dev.gruen.dataframe.settings.DataFrameSettings;
 
 import java.util.List;
 
@@ -35,4 +36,13 @@ import java.util.List;
  */
 public interface DataIterator<R extends Row<?, ?>> extends RowIterator<R>, RowIterable<R> {
     List<ColumnInformation> getColumnsInformation();
+
+    /**
+     * Returns the column settings that should be applied to the columns created from this iterator.
+     *
+     * @return column settings or <code>null</code> if no settings are defined
+     */
+    default DataFrameSettings getDataFrameSettings() {
+        return null;
+    }
 }

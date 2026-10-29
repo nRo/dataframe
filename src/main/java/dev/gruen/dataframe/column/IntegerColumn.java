@@ -32,7 +32,7 @@ import dev.gruen.dataframe.type.impl.IntegerType;
  */
 public class IntegerColumn extends NumberColumn<Integer, IntegerColumn> {
 
-    private final IntegerType valueType = new IntegerType();
+    private final IntegerType valueType = new IntegerType(getSettings());
 
     public IntegerColumn() {
         super(Integer.class);
@@ -65,7 +65,9 @@ public class IntegerColumn extends NumberColumn<Integer, IntegerColumn> {
     public IntegerColumn copy() {
         Integer[] copyValues = new Integer[values.length];
         toArray(copyValues);
-        return new IntegerColumn(getName(), copyValues, size());
+        IntegerColumn copy = new IntegerColumn(getName(), copyValues, size());
+        getSettings().applyTo(copy.getSettings());
+        return copy;
     }
 
     @Override
@@ -80,6 +82,8 @@ public class IntegerColumn extends NumberColumn<Integer, IntegerColumn> {
 
     @Override
     public IntegerColumn copyEmpty() {
-        return new IntegerColumn(getName());
+        IntegerColumn copy = new IntegerColumn(getName());
+        getSettings().applyTo(copy.getSettings());
+        return copy;
     }
 }

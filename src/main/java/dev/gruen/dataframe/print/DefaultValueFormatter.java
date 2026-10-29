@@ -26,10 +26,15 @@ package dev.gruen.dataframe.print;
 
 
 import dev.gruen.dataframe.type.ValueType;
+import dev.gruen.dataframe.type.impl.TemporalType;
 
 public class DefaultValueFormatter implements ValueFormatter {
     @Override
     public String format(ValueType<?> valueType, Object value, int maxWidth) {
+        if (valueType instanceof TemporalType<?> && valueType.getType().isInstance(value)) {
+            // temporal values are printed with the format of their column
+            value = valueType.toStringRaw(value);
+        }
         if ((value instanceof String)) {
             String strVal = (String) value;
             if (strVal.length() > maxWidth) {
