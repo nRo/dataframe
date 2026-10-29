@@ -1,8 +1,17 @@
 package dev.gruen.dataframe.type.impl;
 
 import dev.gruen.dataframe.common.NumberUtil;
+import dev.gruen.dataframe.settings.ColumnSettings;
 
 public abstract class NumberType<T extends Number & Comparable<T>> extends ComparableType<T> {
+    protected NumberType() {
+        super();
+    }
+
+    protected NumberType(ColumnSettings settings) {
+        super(settings);
+    }
+
     @Override
     public T convertRaw(Object o) {
         if (o instanceof Number) {

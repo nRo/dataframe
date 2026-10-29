@@ -1,5 +1,7 @@
 package dev.gruen.dataframe.type.impl;
 
+import dev.gruen.dataframe.settings.ColumnSettings;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -7,6 +9,14 @@ import java.io.Writer;
 import java.nio.ByteBuffer;
 
 public class ShortType extends NumberType<Short> {
+    public ShortType() {
+        super();
+    }
+
+    public ShortType(ColumnSettings settings) {
+        super(settings);
+    }
+
     @Override
     public Class<Short> getType() {
         return Short.class;

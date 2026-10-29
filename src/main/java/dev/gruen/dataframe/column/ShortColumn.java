@@ -32,7 +32,7 @@ import dev.gruen.dataframe.type.impl.ShortType;
  */
 public class ShortColumn extends NumberColumn<Short, ShortColumn> {
 
-    private final ShortType valueType = new ShortType();
+    private final ShortType valueType = new ShortType(getSettings());
 
     public ShortColumn() {
         super(Short.class);
@@ -65,7 +65,9 @@ public class ShortColumn extends NumberColumn<Short, ShortColumn> {
     public ShortColumn copy() {
         Short[] copyValues = new Short[values.length];
         toArray(copyValues);
-        return new ShortColumn(getName(), copyValues, size());
+        ShortColumn copy = new ShortColumn(getName(), copyValues, size());
+        getSettings().applyTo(copy.getSettings());
+        return copy;
     }
     @Override
     public <H> Short getValueFromRow(Row<?, H> row, H headerName) {
@@ -79,6 +81,8 @@ public class ShortColumn extends NumberColumn<Short, ShortColumn> {
 
     @Override
     public ShortColumn copyEmpty() {
-        return new ShortColumn(getName());
+        ShortColumn copy = new ShortColumn(getName());
+        getSettings().applyTo(copy.getSettings());
+        return copy;
     }
 }

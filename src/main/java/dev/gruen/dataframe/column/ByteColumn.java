@@ -33,7 +33,7 @@ import dev.gruen.dataframe.type.impl.ByteType;
  */
 public class ByteColumn extends NumberColumn<Byte, ByteColumn> {
 
-    private static final ByteType valueType = new ByteType();
+    private final ByteType valueType = new ByteType(getSettings());
 
     @Override
     public ValueType<Byte> getValueType() {
@@ -66,7 +66,9 @@ public class ByteColumn extends NumberColumn<Byte, ByteColumn> {
     public ByteColumn copy() {
         Byte[] copyValues = new Byte[values.length];
         toArray(copyValues);
-        return new ByteColumn(getName(), copyValues, size());
+        ByteColumn copy = new ByteColumn(getName(), copyValues, size());
+        getSettings().applyTo(copy.getSettings());
+        return copy;
     }
 
     @Override
@@ -81,6 +83,8 @@ public class ByteColumn extends NumberColumn<Byte, ByteColumn> {
 
     @Override
     public ByteColumn copyEmpty() {
-        return new ByteColumn(getName());
+        ByteColumn copy = new ByteColumn(getName());
+        getSettings().applyTo(copy.getSettings());
+        return copy;
     }
 }

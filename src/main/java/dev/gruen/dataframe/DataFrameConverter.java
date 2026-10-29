@@ -31,11 +31,19 @@ import dev.gruen.dataframe.common.row.BasicRow;
 import dev.gruen.dataframe.filter.FilterPredicate;
 import dev.gruen.dataframe.io.ColumnInformation;
 import dev.gruen.dataframe.io.DataIterator;
+import dev.gruen.dataframe.settings.DataFrameSettings;
+import dev.gruen.dataframe.settings.TemporalFormatSetting;
 import dev.gruen.dataframe.type.DataFrameTypeManager;
 import dev.gruen.dataframe.type.ValueType;
+import dev.gruen.dataframe.type.impl.TemporalType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -54,7 +62,13 @@ public class DataFrameConverter {
                     DataFrameTypeManager.get().findValueTypeOrNull(Integer.class),
                     DataFrameTypeManager.get().findValueTypeOrNull(Long.class),
                     DataFrameTypeManager.get().findValueTypeOrNull(Double.class),
-
+                    // temporal types are detected in this order,
+                    // Instant is checked before OffsetDateTime so text ending with Z is an Instant
+                    DataFrameTypeManager.get().findValueTypeOrNull(LocalDate.class),
+                    DataFrameTypeManager.get().findValueTypeOrNull(LocalTime.class),
+                    DataFrameTypeManager.get().findValueTypeOrNull(LocalDateTime.class),
+                    DataFrameTypeManager.get().findValueTypeOrNull(Instant.class),
+                    DataFrameTypeManager.get().findValueTypeOrNull(OffsetDateTime.class),
             };
 
     private DataFrameConverter() {
@@ -105,6 +119,56 @@ public class DataFrameConverter {
      * @return created data frame
      */
     public static <R extends Row<?, ?>> DataFrame fromDataIterator(DataIterator<R> dataIterator, int expectedSize, List<ColumnInformation> columnsInformation, FilterPredicate filterPredicate) {
+        return fromDataIterator(dataIterator, expectedSize, columnsInformation, filterPredicate, null);
+    }
+
+    /**
+     * Converts a parent data container to a data frame.
+     * The column settings are applied to all created columns.
+     *
+     * @param <R>             row type
+     * @param dataIterator    parent data container
+     * @param filterPredicate row filter
+     * @param settings        column settings, can be <code>null</code>
+     * @return created data frame
+     */
+    public static <R extends Row<?, ?>> DataFrame fromDataIterator(DataIterator<R> dataIterator, FilterPredicate filterPredicate, DataFrameSettings settings) {
+        return fromDataIterator(dataIterator, -1, null, filterPredicate, settings);
+    }
+
+    /**
+     * Converts a parent data container to a data frame.
+     * The column settings are applied to all created columns.
+     *
+     * @param <R>                row type
+     * @param dataIterator       parent data container
+     * @param columnsInformation column information
+     * @param filterPredicate    row filter
+     * @param settings           column settings, can be <code>null</code>
+     * @return created data frame
+     */
+    public static <R extends Row<?, ?>> DataFrame fromDataIterator(DataIterator<R> dataIterator, List<ColumnInformation> columnsInformation, FilterPredicate filterPredicate, DataFrameSettings settings) {
+        return fromDataIterator(dataIterator, -1, columnsInformation, filterPredicate, settings);
+    }
+
+    /**
+     * Converts a parent data container to a data frame.
+     * The column settings are applied to all created columns, including columns that
+     * replace a column during type auto detection.
+     * If no settings are provided, the settings of the data iterator are used.
+     *
+     * @param <R>                row type
+     * @param dataIterator       parent data container
+     * @param expectedSize       expected size of the resulting dataframe
+     * @param columnsInformation column information
+     * @param filterPredicate    row filter
+     * @param settings           column settings, can be <code>null</code>
+     * @return created data frame
+     */
+    public static <R extends Row<?, ?>> DataFrame fromDataIterator(DataIterator<R> dataIterator, int expectedSize, List<ColumnInformation> columnsInformation, FilterPredicate filterPredicate, DataFrameSettings settings) {
+        if (settings == null) {
+            settings = dataIterator.getDataFrameSettings();
+        }
 
         if (columnsInformation == null) {
             columnsInformation = new ArrayList<>(dataIterator.getColumnsInformation());
@@ -117,6 +181,9 @@ public class DataFrameConverter {
         DataFrameColumn<?, ?>[] columns = new DataFrameColumn[columnCount];
         boolean[] autodetect = new boolean[columns.length];
         boolean[][] types = new boolean[columns.length][valueTypes.length];
+        // value types used for detection, temporal types use the settings of the column
+        ValueType<?>[][] detectTypes = new ValueType[columns.length][];
+        DataFrameColumn<?, ?>[][] candidates = new DataFrameColumn[columns.length][];
         boolean hasAutodetect = false;
         for (int i = 0; i < columnCount; i++) {
             ColumnInformation columnInformation = columnsInformation.get(i);
@@ -127,14 +194,24 @@ public class DataFrameConverter {
                 col.setCapacity(expectedSize);
             }
             col.setName(columnInformation.getName());
+            col.setColumnIndex(i);
+            if (settings != null) {
+                settings.applyToColumn(col);
+            }
             dataFrame.addColumn(col);
             columns[i] = col;
             autodetect[i] = columnInformation.isAutodetect()
                     && columnInformation.getColumnType().equals(StringColumn.class);
             if (autodetect[i]) {
                 hasAutodetect = true;
+                detectTypes[i] = valueTypes.clone();
+                candidates[i] = new DataFrameColumn[valueTypes.length];
                 for (int j = 0; j < valueTypes.length; j++) {
                     types[i][j] = true;
+                    if (valueTypes[j] instanceof TemporalType<?>) {
+                        candidates[i][j] = createCandidate(valueTypes[j].getType(), col, i, settings);
+                        detectTypes[i][j] = candidates[i][j].getValueType();
+                    }
                 }
             }
         }
@@ -162,7 +239,7 @@ public class DataFrameConverter {
                 if (autodetect[i] && (!SAMPLE_ROW_DETECTION || doSample(r))) {
                     for (int j = 0; j < valueTypes.length; j++) {
                         types[i][j] = types[i][j]
-                                && (valueTypes[j].parseOrNull(val.toString()) != null);
+                                && matches(detectTypes[i][j], val.toString());
                     }
                 }
                 rowValues[i] = val;
@@ -173,7 +250,7 @@ public class DataFrameConverter {
             r++;
         }
         if (hasAutodetect) {
-            replaceAutodetectColumns(dataFrame, valueTypes, autodetect, types);
+            replaceAutodetectColumns(dataFrame, valueTypes, autodetect, types, settings, candidates);
             if (filterPredicate != null && filterPredicate != FilterPredicate.EMPTY_FILTER) {
                 dataFrame.filter(filterPredicate);
             }
@@ -188,6 +265,29 @@ public class DataFrameConverter {
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static DataFrameColumn<?, ?> createColumn(Class<? extends DataFrameColumn> colType) {
         return DataFrameTypeManager.get().createColumn((Class) colType);
+    }
+
+    /**
+     * Creates a column that is used to detect and parse a temporal type.
+     * The column has the settings of the column it may replace and the data frame settings.
+     */
+    private static DataFrameColumn<?, ?> createCandidate(Class<?> valueType, DataFrameColumn<?, ?> original,
+                                                         int index, DataFrameSettings settings) {
+        DataFrameColumn<?, ?> candidate = DataFrameTypeManager.get().createColumnForType(valueType);
+        candidate.setName(original.getName());
+        candidate.setColumnIndex(index);
+        original.getSettings().applyTo(candidate.getSettings());
+        if (settings != null) {
+            settings.applyToColumn(candidate);
+        }
+        return candidate;
+    }
+
+    private static boolean matches(ValueType<?> type, String text) {
+        if (type instanceof TemporalType<?> temporalType) {
+            return temporalType.matchesForDetection(text);
+        }
+        return type.parseOrNull(text) != null;
     }
 
     private static boolean doSample(int row) {
@@ -216,23 +316,42 @@ public class DataFrameConverter {
     }
 
     private static void replaceAutodetectColumns(DataFrame dataFrame, ValueType<?>[] valueTypes,
-                                                 boolean[] autodetect, boolean[][] types) {
+                                                 boolean[] autodetect, boolean[][] types,
+                                                 DataFrameSettings settings,
+                                                 DataFrameColumn<?, ?>[][] candidates) {
         DataFrameColumn<?, ?>[] newColumns = new DataFrameColumn[autodetect.length];
         List<String> columnNames = new ArrayList<>(dataFrame.getColumnNames());
         for (int i = 0; i < autodetect.length; i++) {
             if (autodetect[i]) {
-                Class<?> colType = null;
-                for (int j = 0; j < valueTypes.length; j++) {
-                    if (types[i][j]) {
-                        colType = valueTypes[j].getType();
-                        break;
+                int detected = -1;
+                // a column with a temporal format setting is a temporal column if its values match the format,
+                // e.g. 07.30 is a valid time for the format HH.mm but also a valid double
+                if (dataFrame.getColumn(columnNames.get(i)).getSettings().get(TemporalFormatSetting.class) != null) {
+                    for (int j = 0; j < valueTypes.length; j++) {
+                        if (types[i][j] && candidates[i][j] != null) {
+                            detected = j;
+                            break;
+                        }
                     }
                 }
-                if (colType == null) {
+                for (int j = 0; j < valueTypes.length && detected < 0; j++) {
+                    if (types[i][j]) {
+                        detected = j;
+                    }
+                }
+                if (detected < 0) {
                     continue;
                 }
-                DataFrameColumn<?, ?> newColumn = DataFrameTypeManager.get().createColumnForType(colType);
-                newColumn.setName(columnNames.get(i));
+                DataFrameColumn<?, ?> newColumn = candidates[i][detected];
+                if (newColumn == null) {
+                    newColumn = DataFrameTypeManager.get().createColumnForType(valueTypes[detected].getType());
+                    newColumn.setName(columnNames.get(i));
+                    newColumn.setColumnIndex(i);
+                    dataFrame.getColumn(columnNames.get(i)).getSettings().applyTo(newColumn.getSettings());
+                    if (settings != null) {
+                        settings.applyToColumn(newColumn);
+                    }
+                }
                 newColumn.setCapacity(dataFrame.size());
                 newColumns[i] = newColumn;
             }

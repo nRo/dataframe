@@ -32,7 +32,7 @@ import dev.gruen.dataframe.type.impl.DoubleType;
  */
 public class DoubleColumn extends NumberColumn<Double, DoubleColumn> {
 
-    private final DoubleType valueType = new DoubleType();
+    private final DoubleType valueType = new DoubleType(getSettings());
 
 
     @Override
@@ -65,7 +65,9 @@ public class DoubleColumn extends NumberColumn<Double, DoubleColumn> {
     public DoubleColumn copy() {
         Double[] copyValues = new Double[values.length];
         toArray(copyValues);
-        return new DoubleColumn(getName(), copyValues, size());
+        DoubleColumn copy = new DoubleColumn(getName(), copyValues, size());
+        getSettings().applyTo(copy.getSettings());
+        return copy;
     }
     @Override
     public <H> Double getValueFromRow(Row<?, H> row, H headerName) {
@@ -79,6 +81,8 @@ public class DoubleColumn extends NumberColumn<Double, DoubleColumn> {
 
     @Override
     public DoubleColumn copyEmpty() {
-        return new DoubleColumn(getName());
+        DoubleColumn copy = new DoubleColumn(getName());
+        getSettings().applyTo(copy.getSettings());
+        return copy;
     }
 }

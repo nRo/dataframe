@@ -13,8 +13,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - Boolean column flags (`flag`, `!flag`) are no longer supported. Use `flag == true` / `flag == false`.
   - A query that is a single word is parsed as full-text search, which is not supported by DataFrame, and raises a `PredicateCompilerException`.
   - Decimal numbers with a comma (`1,5`) are no longer supported because `,` separates the values of `in (..)` lists. Use `1.5`.
+- CSV columns without a declared type are now also checked for ISO-8601 date and time values (`LocalDate`, `LocalTime`, `LocalDateTime`,
+  `Instant`, `OffsetDateTime`) after `Boolean`, `Integer`, `Long` and `Double`. Columns that used to be loaded as `String` columns
+  (e.g. `2020-03-01` or `13:45`) now get a temporal column type. Declare the column as `String` with `setColumnType(name, String.class)`
+  to keep the old behaviour.
+- `csv.ColumnSettings` was renamed to `csv.CSVColumnSettings` to avoid a name clash with `settings.ColumnSettings`.
 
 ### Added
+- Temporal column types: `LocalDateColumn`, `LocalTimeColumn`, `LocalDateTimeColumn`, `InstantColumn`, `OffsetDateTimeColumn` and
+  `ZonedDateTimeColumn` with matching value types, `add...Column` / `get...Column` methods in `DataFrame` and `DataFrameBuilder`,
+  binary and CSV support and ISO-8601 auto-detection.
+- Per-column settings (`dev.gruen.dataframe.settings`): `ColumnSettings`, `DataFrameSettings`, `ColumnMatchers` and the settings
+  `TemporalFormatSetting` (pattern and locale), `TimeZoneSetting` and `EncodingSetting` (charset of `StringType`).
+  Settings are passed with `withSettings(DataFrameSettings)` of `CSVReaderBuilder` and are kept when columns are copied.
 - Filter queries support `in (1, 2)`, `!in (1, 2)` and `*=` (contains) operators.
 
 ## [0.8.0]

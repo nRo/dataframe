@@ -32,7 +32,7 @@ import dev.gruen.dataframe.type.impl.LongType;
  */
 public class LongColumn extends NumberColumn<Long, LongColumn> {
 
-    private final LongType valueType = new LongType();
+    private final LongType valueType = new LongType(getSettings());
 
     public LongColumn() {
         super(Long.class);
@@ -65,7 +65,9 @@ public class LongColumn extends NumberColumn<Long, LongColumn> {
     public LongColumn copy() {
         Long[] copyValues = new Long[values.length];
         toArray(copyValues);
-        return new LongColumn(getName(), copyValues, size());
+        LongColumn copy = new LongColumn(getName(), copyValues, size());
+        getSettings().applyTo(copy.getSettings());
+        return copy;
     }
 
     @Override
@@ -80,6 +82,8 @@ public class LongColumn extends NumberColumn<Long, LongColumn> {
 
     @Override
     public LongColumn copyEmpty() {
-        return new LongColumn(getName());
+        LongColumn copy = new LongColumn(getName());
+        getSettings().applyTo(copy.getSettings());
+        return copy;
     }
 }

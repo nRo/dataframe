@@ -33,7 +33,7 @@ import dev.gruen.dataframe.type.impl.StringType;
  */
 public class StringColumn extends BasicColumn<String, StringColumn> {
 
-    private final static StringType valueType = new StringType();
+    private final StringType valueType = new StringType(getSettings());
 
     public StringColumn() {
         super(String.class);
@@ -67,7 +67,9 @@ public class StringColumn extends BasicColumn<String, StringColumn> {
     public StringColumn copy() {
         String[] copyValues = new String[values.length];
         toArray(copyValues);
-        return new StringColumn(getName(), copyValues, size());
+        StringColumn copy = new StringColumn(getName(), copyValues, size());
+        getSettings().applyTo(copy.getSettings());
+        return copy;
     }
 
     @Override
@@ -82,6 +84,8 @@ public class StringColumn extends BasicColumn<String, StringColumn> {
 
     @Override
     public StringColumn copyEmpty() {
-        return new StringColumn(getName());
+        StringColumn copy = new StringColumn(getName());
+        getSettings().applyTo(copy.getSettings());
+        return copy;
     }
 }

@@ -1,5 +1,7 @@
 package dev.gruen.dataframe.type.impl;
 
+import dev.gruen.dataframe.settings.ColumnSettings;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -7,6 +9,14 @@ import java.io.Writer;
 import java.nio.ByteBuffer;
 
 public class DoubleType extends NumberType<Double> {
+    public DoubleType() {
+        super();
+    }
+
+    public DoubleType(ColumnSettings settings) {
+        super(settings);
+    }
+
     @Override
     public Class<Double> getType() {
         return Double.class;

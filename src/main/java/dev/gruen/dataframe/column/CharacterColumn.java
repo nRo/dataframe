@@ -32,7 +32,7 @@ import dev.gruen.dataframe.type.impl.CharacterType;
  */
 public class CharacterColumn extends BasicColumn<Character, CharacterColumn> {
 
-    private final static CharacterType valueType = new CharacterType();
+    private final CharacterType valueType = new CharacterType(getSettings());
 
     public CharacterColumn() {
         super(Character.class);
@@ -66,11 +66,15 @@ public class CharacterColumn extends BasicColumn<Character, CharacterColumn> {
     public CharacterColumn copy() {
         Character[] copyValues = new Character[values.length];
         toArray(copyValues);
-        return new CharacterColumn(getName(), copyValues, size());
+        CharacterColumn copy = new CharacterColumn(getName(), copyValues, size());
+        getSettings().applyTo(copy.getSettings());
+        return copy;
     }
 
     @Override
     public CharacterColumn copyEmpty() {
-        return new CharacterColumn(getName());
+        CharacterColumn copy = new CharacterColumn(getName());
+        getSettings().applyTo(copy.getSettings());
+        return copy;
     }
 }

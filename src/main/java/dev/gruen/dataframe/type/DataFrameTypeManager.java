@@ -46,7 +46,13 @@ public class DataFrameTypeManager {
             new LongColumn(),
             new BooleanColumn(),
             new ShortColumn(),
-            new ByteColumn()
+            new ByteColumn(),
+            new LocalDateColumn(),
+            new LocalTimeColumn(),
+            new LocalDateTimeColumn(),
+            new InstantColumn(),
+            new OffsetDateTimeColumn(),
+            new ZonedDateTimeColumn()
     );
 
     private static final DataFrameTypeManager defaultInstance = createNew();

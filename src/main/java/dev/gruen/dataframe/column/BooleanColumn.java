@@ -33,7 +33,7 @@ import dev.gruen.dataframe.type.impl.BooleanType;
  */
 public class BooleanColumn extends BasicColumn<Boolean, BooleanColumn> {
 
-    private final BooleanType valueType = new BooleanType();
+    private final BooleanType valueType = new BooleanType(getSettings());
 
     public BooleanColumn() {
         super(Boolean.class);
@@ -103,12 +103,16 @@ public class BooleanColumn extends BasicColumn<Boolean, BooleanColumn> {
     public BooleanColumn copy() {
         Boolean[] copyValues = new Boolean[values.length];
         toArray(copyValues);
-        return new BooleanColumn(getName(), copyValues, size());
+        BooleanColumn copy = new BooleanColumn(getName(), copyValues, size());
+        getSettings().applyTo(copy.getSettings());
+        return copy;
     }
 
     @Override
     public BooleanColumn copyEmpty() {
-        return new BooleanColumn(getName());
+        BooleanColumn copy = new BooleanColumn(getName());
+        getSettings().applyTo(copy.getSettings());
+        return copy;
     }
 
     @Override

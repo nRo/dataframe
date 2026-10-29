@@ -218,6 +218,30 @@ public class DefaultDataFrame implements DataFrame {
         return addColumn(column);
     }
 
+    public DefaultDataFrame addLocalDateColumn(String name) {
+        return addColumn(new LocalDateColumn(name));
+    }
+
+    public DefaultDataFrame addLocalTimeColumn(String name) {
+        return addColumn(new LocalTimeColumn(name));
+    }
+
+    public DefaultDataFrame addLocalDateTimeColumn(String name) {
+        return addColumn(new LocalDateTimeColumn(name));
+    }
+
+    public DefaultDataFrame addInstantColumn(String name) {
+        return addColumn(new InstantColumn(name));
+    }
+
+    public DefaultDataFrame addOffsetDateTimeColumn(String name) {
+        return addColumn(new OffsetDateTimeColumn(name));
+    }
+
+    public DefaultDataFrame addZonedDateTimeColumn(String name) {
+        return addColumn(new ZonedDateTimeColumn(name));
+    }
+
 
     public DefaultDataFrame addDoubleColumn(String name) {
         DoubleColumn column = new DoubleColumn(name);
@@ -465,6 +489,8 @@ public class DefaultDataFrame implements DataFrame {
             try {
                 DataFrameColumn<?, ?> column = DataFrameTypeManager.get().createColumn(type);
                 column.setName(columnName);
+                // the value type shares the settings of the column it was taken from
+                type.getSettings().applyTo(column.getSettings());
                 addColumn(column);
             } catch (Exception e) {
                 throw new DataFrameRuntimeException("error creating column instance", e);
@@ -906,6 +932,36 @@ public class DefaultDataFrame implements DataFrame {
     @Override
     public ByteColumn getByteColumn(String name) {
         return getColumn(name, ByteColumn.class);
+    }
+
+    @Override
+    public LocalDateColumn getLocalDateColumn(String name) {
+        return getColumn(name, LocalDateColumn.class);
+    }
+
+    @Override
+    public LocalTimeColumn getLocalTimeColumn(String name) {
+        return getColumn(name, LocalTimeColumn.class);
+    }
+
+    @Override
+    public LocalDateTimeColumn getLocalDateTimeColumn(String name) {
+        return getColumn(name, LocalDateTimeColumn.class);
+    }
+
+    @Override
+    public InstantColumn getInstantColumn(String name) {
+        return getColumn(name, InstantColumn.class);
+    }
+
+    @Override
+    public OffsetDateTimeColumn getOffsetDateTimeColumn(String name) {
+        return getColumn(name, OffsetDateTimeColumn.class);
+    }
+
+    @Override
+    public ZonedDateTimeColumn getZonedDateTimeColumn(String name) {
+        return getColumn(name, ZonedDateTimeColumn.class);
     }
 
 

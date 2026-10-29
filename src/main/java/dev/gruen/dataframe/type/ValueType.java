@@ -1,5 +1,7 @@
 package dev.gruen.dataframe.type;
 
+import dev.gruen.dataframe.settings.ColumnSettings;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -9,6 +11,25 @@ import java.text.ParseException;
 import java.util.Comparator;
 
 public abstract class ValueType<T> {
+    private final ColumnSettings settings;
+
+    protected ValueType() {
+        this(new ColumnSettings());
+    }
+
+    /**
+     * Creates a value type that reads its configuration from the settings of a column.
+     *
+     * @param settings column settings
+     */
+    protected ValueType(ColumnSettings settings) {
+        this.settings = settings == null ? new ColumnSettings() : settings;
+    }
+
+    public ColumnSettings getSettings() {
+        return settings;
+    }
+
     public abstract Class<T> getType();
 
     public abstract Comparator<T> getComparator();

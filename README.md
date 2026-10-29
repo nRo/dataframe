@@ -72,48 +72,10 @@ sources and javadoc jars, signs the artifacts with GPG and uploads them using th
 The GitHub Actions workflow `release.yml` runs this for tags named `v*` and needs the secrets
 `CENTRAL_USERNAME`, `CENTRAL_PASSWORD`, `GPG_PRIVATE_KEY` and `GPG_PASSPHRASE`.
 
-Version 0.8.1
+Changelog
 -----
-- use [query-compiler](https://github.com/nRo/query-compiler) library
-
-Version 0.8.0
------
-See [CHANGELOG.md](CHANGELOG.md) for the complete list of changes.
-
-- **Java 21 or newer is required**
-- **UTF-8 is the default charset**
-- **groupId and package changed to dev.gruen**
-
-### Migration from 0.7
-| Change | What to do |
-|---|---|
-| The Maven `groupId` changed from `de.unknownreality` to `dev.gruen`, and the Java packages changed from `de.unknownreality.dataframe` to `dev.gruen.dataframe` | Change the `groupId` in your dependency declaration and replace `de.unknownreality.dataframe` with `dev.gruen.dataframe` in your imports. Older releases stay available under the old `groupId`. Old meta files are remapped automatically. |
-| Java 21 is required | Update your JDK and the `maven.compiler.release` of your project. |
-
-Version 0.7.5
------
--  **direct value access for DataRow object.**
-
-   DataRows now directly access the respective values from the columns.  
-   This improves runtime and memory footprint for most DataFrame operations.
-   DataRow objects are invalidated once the source DataFrame is changed.  
-   Accessing an invalidated row results in an exception
-- Row collections are now return as DataRows object.  
-    DataRows can be converted to a new DataFrame
-- improved 'groupBy' method
-
-
-Version 0.7
------
-- The read and write functions have been rewritten from scratch for this version.
-Some existing methods have been removed.
-
-- Data grouping has been refactored and aggregation functions can now be applied to data groupings.
-In general, data groupings can now be used like normal DataFrames.
-
-- Java 8 is now required.
-
-- Empty DataFrame instances are now created using DataFrame.create()
+See [CHANGELOG.md](CHANGELOG.md) for the list of changes and breaking changes of each version
+(including the migration from 0.7 to 0.8: new `groupId` and package `dev.gruen`, Java 21, UTF-8 default).
 
 Examples
 -----
@@ -462,3 +424,39 @@ DataFrame visitors = users.joinLeft(visits,"person_id");
 DataFrame userOrders = users.joinInner(orders,new JoinColumn("person_id","customer_id"));
 ```
 
+Date and time values are stored in typed columns. The following columns are available:
+
+| Column | Value type | Default (ISO-8601) format |
+|---|---|---|
+| `LocalDateColumn` | `java.time.LocalDate` | `2020-03-01` |
+| `LocalTimeColumn` | `java.time.LocalTime` | `13:45:10` |
+| `LocalDateTimeColumn` | `java.time.LocalDateTime` | `2020-03-01T13:45:10` |
+| `InstantColumn` | `java.time.Instant` | `2020-03-01T13:45:10Z` |
+| `OffsetDateTimeColumn` | `java.time.OffsetDateTime` | `2020-03-01T13:45:10+02:00` |
+| `ZonedDateTimeColumn` | `java.time.ZonedDateTime` | `2020-03-01T13:45:10+01:00[Europe/Berlin]` |
+
+Columns are added with `addLocalDateColumn(name)` (and the matching methods for the other types) and read with
+`getLocalDateColumn(name)`. Sorting, grouping, joining, printing and filtering (`created > '2020-01-01'`) work like for
+all other column types. Values are written to CSV and printed with the format of their column.
+
+**Auto-detection.** If a CSV column is not declared with a type, ISO-8601 values are detected in this order:
+`LocalDate`, `LocalTime`, `LocalDateTime`, `Instant` (text ending with `Z`), `OffsetDateTime` (other offsets).
+`ZonedDateTime` columns are not detected automatically; declare them with `setColumnType(name, ZonedDateTime.class)`.
+A column stays a `String` column if one of the sampled values can not be parsed. If a column has a format setting,
+the temporal types are checked first, using that format.
+
+**Settings per column.** The format and the time zone of a column are configured with column settings. Settings are
+assigned to columns with matchers (`byName`, `byIndex`, `byValueType`, `byColumnType`, `any`, `all`, `not`).
+If a column has a format setting, the format is used for detection, parsing and writing.
+
+```java
+DataFrameSettings settings = DataFrameSettings.builder()
+    .add(new TemporalFormatSetting("dd.MM.yyyy HH:mm"), ColumnMatchers.byName("created"))
+    .add(new TimeZoneSetting(ZoneId.of("Europe/Berlin")), ColumnMatchers.byColumnType(InstantColumn.class))
+    .build();
+DataFrame df = DataFrame.load(file, CSVReaderBuilder.create().withSettings(settings).build());
+```
+
+A `TimeZoneSetting` supplies the zone for text without zone information (`Instant`, `OffsetDateTime` and
+`ZonedDateTime` columns). The default zone is UTC. Settings can also be changed on an existing column with
+`column.getSettings().add(...)`.

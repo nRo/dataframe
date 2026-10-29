@@ -1,5 +1,7 @@
 package dev.gruen.dataframe.type.impl;
 
+import dev.gruen.dataframe.settings.ColumnSettings;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -8,6 +10,14 @@ import java.nio.ByteBuffer;
 import java.text.ParseException;
 
 public class BooleanType extends ComparableType<Boolean> {
+    public BooleanType() {
+        super();
+    }
+
+    public BooleanType(ColumnSettings settings) {
+        super(settings);
+    }
+
     @Override
     public Class<Boolean> getType() {
         return Boolean.class;

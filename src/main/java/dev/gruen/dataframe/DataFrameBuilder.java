@@ -104,6 +104,66 @@ public class DataFrameBuilder {
     }
 
     /**
+     * Adds a new {@link LocalDateColumn} to the builder.
+     *
+     * @param name name of the column
+     * @return <code>self</code> for method chaining
+     */
+    public DataFrameBuilder addLocalDateColumn(String name) {
+        return addColumn(new LocalDateColumn(name));
+    }
+
+    /**
+     * Adds a new {@link LocalTimeColumn} to the builder.
+     *
+     * @param name name of the column
+     * @return <code>self</code> for method chaining
+     */
+    public DataFrameBuilder addLocalTimeColumn(String name) {
+        return addColumn(new LocalTimeColumn(name));
+    }
+
+    /**
+     * Adds a new {@link LocalDateTimeColumn} to the builder.
+     *
+     * @param name name of the column
+     * @return <code>self</code> for method chaining
+     */
+    public DataFrameBuilder addLocalDateTimeColumn(String name) {
+        return addColumn(new LocalDateTimeColumn(name));
+    }
+
+    /**
+     * Adds a new {@link InstantColumn} to the builder.
+     *
+     * @param name name of the column
+     * @return <code>self</code> for method chaining
+     */
+    public DataFrameBuilder addInstantColumn(String name) {
+        return addColumn(new InstantColumn(name));
+    }
+
+    /**
+     * Adds a new {@link OffsetDateTimeColumn} to the builder.
+     *
+     * @param name name of the column
+     * @return <code>self</code> for method chaining
+     */
+    public DataFrameBuilder addOffsetDateTimeColumn(String name) {
+        return addColumn(new OffsetDateTimeColumn(name));
+    }
+
+    /**
+     * Adds a new {@link ZonedDateTimeColumn} to the builder.
+     *
+     * @param name name of the column
+     * @return <code>self</code> for method chaining
+     */
+    public DataFrameBuilder addZonedDateTimeColumn(String name) {
+        return addColumn(new ZonedDateTimeColumn(name));
+    }
+
+    /**
      * Adds a new {@link DoubleColumn} to the builder.
      *
      * @param name name of the column

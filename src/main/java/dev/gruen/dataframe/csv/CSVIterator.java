@@ -28,6 +28,7 @@ import dev.gruen.dataframe.common.StringSplitter;
 import dev.gruen.dataframe.io.BufferedStreamIterator;
 import dev.gruen.dataframe.io.ColumnInformation;
 import dev.gruen.dataframe.io.DataIterator;
+import dev.gruen.dataframe.settings.DataFrameSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +43,7 @@ public class CSVIterator extends BufferedStreamIterator<CSVRow> implements DataI
 
     private int lineNumber = 0;
     private final CSVSettings csvSettings;
-    private final ColumnSettings columnSettings;
+    private final DataFrameSettings dataFrameSettings;
     private final CSVHeader header = new CSVHeader();
     private int cols = -1;
     private final Set<String> ignoredColumns;
@@ -54,10 +55,15 @@ public class CSVIterator extends BufferedStreamIterator<CSVRow> implements DataI
     private boolean[] skipIndices;
     private final StringSplitter stringSplitter = new StringSplitter();
 
-    public CSVIterator(BufferedReader reader, CSVSettings csvSettings, ColumnSettings columnSettings) {
+    public CSVIterator(BufferedReader reader, CSVSettings csvSettings, CSVColumnSettings columnSettings) {
+        this(reader, csvSettings, columnSettings, null);
+    }
+
+    public CSVIterator(BufferedReader reader, CSVSettings csvSettings, CSVColumnSettings columnSettings,
+                       DataFrameSettings dataFrameSettings) {
         super(reader);
+        this.dataFrameSettings = dataFrameSettings;
         this.csvSettings = csvSettings;
-        this.columnSettings = columnSettings;
         ignoredColumns = new HashSet<>(columnSettings.getIgnoreColumns());
         includedColumns = new HashSet<>(columnSettings.getSelectColumns());
         colTypes = new HashMap<>(columnSettings.getColumnTypeMap());
@@ -208,6 +214,11 @@ public class CSVIterator extends BufferedStreamIterator<CSVRow> implements DataI
     @Override
     public List<ColumnInformation> getColumnsInformation() {
         return columnInformations;
+    }
+
+    @Override
+    public DataFrameSettings getDataFrameSettings() {
+        return dataFrameSettings;
     }
 
     @Override

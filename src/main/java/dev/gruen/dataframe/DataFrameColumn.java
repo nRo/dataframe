@@ -25,6 +25,7 @@
 package dev.gruen.dataframe;
 
 import dev.gruen.dataframe.common.Row;
+import dev.gruen.dataframe.settings.ColumnSettings;
 import dev.gruen.dataframe.transform.ColumnDataFrameTransform;
 import dev.gruen.dataframe.transform.ColumnTransform;
 import dev.gruen.dataframe.type.ValueType;
@@ -44,6 +45,8 @@ public abstract class DataFrameColumn<T, C extends DataFrameColumn<T, C>> implem
     private String name;
     private DefaultDataFrame dataFrame;
     private boolean dataFrameAppend = false;
+    private final ColumnSettings settings = new ColumnSettings();
+    private int columnIndex = -1;
 
 
     /**
@@ -64,6 +67,39 @@ public abstract class DataFrameColumn<T, C extends DataFrameColumn<T, C>> implem
 
 
     public abstract ValueType<T> getValueType();
+
+    /**
+     * Returns the settings of this column.
+     * Value types of this column read their configuration from these settings.
+     *
+     * @return column settings
+     */
+    public ColumnSettings getSettings() {
+        return settings;
+    }
+
+    /**
+     * Returns the index of this column in its data frame.
+     * If the column is not part of a data frame, the index assigned with
+     * {@link #setColumnIndex(int)} is returned (<code>-1</code> if no index was assigned).
+     *
+     * @return column index
+     */
+    public int getColumnIndex() {
+        if (dataFrame != null) {
+            return dataFrame.getHeader().getIndex(name);
+        }
+        return columnIndex;
+    }
+
+    /**
+     * Sets the index of this column while it is not part of a data frame.
+     *
+     * @param columnIndex column index
+     */
+    public void setColumnIndex(int columnIndex) {
+        this.columnIndex = columnIndex;
+    }
 
     /**
      * Used to apply transformations on a column
